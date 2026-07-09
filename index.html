@@ -977,10 +977,20 @@ const LINKS = {
   leaseLimited:"", leaseBasic:"", leasePremium:"", leaseUnlimited:"", exclusive:"",
   mixBand:"", mixRapper:"", merch:"", creators:""
 };
-function openPay(key){
-  const url=(LINKS[key]||'').trim();
-  if(/^https?:\/\//i.test(url)){ window.open(url,'_blank','noopener'); return; }
-  showPanel('contact',true); // no link set yet: route to Contact
+const TIER_SLIDERS={leaseLimited:'pwyw',leaseBasic:'basicSlider',leasePremium:'premiumSlider',leaseUnlimited:'unlimitedSlider'};
+async function openPay(key){
+  // exclusive / mixes / merch are handled by the artist — route to contact.
+  if(!TIER_SLIDERS[key]){ showPanel('contact',true); return; }
+  const track=(tracks[current]&&tracks[current].title)||'';
+  const sl=document.getElementById(TIER_SLIDERS[key]);
+  const amount=sl?+sl.value:undefined;
+  try{
+    const r=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tier:key,track,amount})});
+    const d=await r.json().catch(()=>({}));
+    if(r.ok&&d.url){ window.location.href=d.url; return; }
+    console.warn('checkout unavailable — routing to contact.',d&&d.error);
+    showPanel('contact',true);
+  }catch(e){ console.warn('checkout error — routing to contact.',e); showPanel('contact',true); }
 }
 document.querySelectorAll('[data-pay]').forEach(b=>b.addEventListener('click',()=>openPay(b.dataset.pay)));
 
