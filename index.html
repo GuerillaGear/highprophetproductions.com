@@ -481,7 +481,7 @@ footer b{color:var(--candy)}
         </div>
         <div class="hero-feat">
           <span class="feat-label">Featured beat</span>
-          <div class="feat-title">All The Time</div>
+          <div class="feat-title">Passion</div>
           <div class="feat-meta">High Prophet Productions</div>
           <div class="eq" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
           <button class="feat-play" id="heroPlay">
@@ -522,7 +522,7 @@ footer b{color:var(--candy)}
 
       <div class="playerbar playing-now" id="playerbar">
         <div class="pb-now">
-          <div class="pb-title" id="pbTitle">All The Time</div>
+          <div class="pb-title" id="pbTitle">Passion</div>
           <div class="pb-sub" id="pbSub">92 BPM · Fm</div>
         </div>
         <div class="pb-mid">
@@ -994,12 +994,12 @@ document.getElementById('sendBtn').addEventListener('click',()=>{
 /* Put a hosted MP3/WAV URL in `src` for real playback to every visitor.
    Empty src = animated silent demo bar. Owner can also load local files: add #owner to the URL. */
 const tracks=[
+  {title:'Passion',             bpm:'', key:'', tags:'', len:0, src:'audio/passion.mp3'},
   {title:'All The Time',        bpm:'', key:'', tags:'', len:0, src:'audio/all-the-time.mp3'},
   {title:'Flicker of a Flame',  bpm:'', key:'', tags:'', len:0, src:'audio/flicker-of-a-flame.mp3'},
   {title:'ICY',                 bpm:'', key:'', tags:'', len:0, src:'audio/icy.mp3'},
   {title:'IFEEST',              bpm:'', key:'', tags:'', len:0, src:'audio/ifeest.wav'},
   {title:'Mirrored Perception', bpm:'', key:'', tags:'', len:0, src:'audio/mirrored-perception.mp3'},
-  {title:'Passion',             bpm:'', key:'', tags:'', len:0, src:'audio/passion.mp3'},
   {title:"Who's In The Attic",  bpm:'', key:'', tags:'', len:0, src:'audio/whos-in-the-attic.mp3'},
 ];
 const audio=new Audio(); audio.preload='metadata';
@@ -1040,19 +1040,23 @@ function pause(){playing=false;toggleIcon.setAttribute('d',ICON_PLAY);toggle.set
 function loop(){raf=requestAnimationFrame(loop);const now=performance.now(),dt=(now-last)/1000;last=now;
   if(!playing)return;
   if(hasSrc()){const len=audio.duration||tracks[current].len||1;pos=audio.currentTime;
-    seek.value=len?pos/len*100:0;curEl.textContent=fmt(pos);if(Math.random()<.5)animWave();}
+    if(!scrubbing)seek.value=len?pos/len*100:0;curEl.textContent=fmt(pos);if(Math.random()<.5)animWave();}
   else{pos+=dt;const len=tracks[current].len||180;
     if(pos>=len){load((current+1)%tracks.length,true);return;}
-    seek.value=pos/len*100;curEl.textContent=fmt(pos);if(Math.random()<.5)animWave();}}
+    if(!scrubbing)seek.value=pos/len*100;curEl.textContent=fmt(pos);if(Math.random()<.5)animWave();}}
 audio.addEventListener('loadedmetadata',()=>{if(hasSrc()&&isFinite(audio.duration))durEl.textContent=fmt(audio.duration);});
 audio.addEventListener('ended',()=>load((current+1)%tracks.length,true));
 toggle.addEventListener('click',()=>playing?pause():play());
 document.getElementById('next').addEventListener('click',()=>load((current+1)%tracks.length,true));
 document.getElementById('prev').addEventListener('click',()=>load((current-1+tracks.length)%tracks.length,true));
-seek.addEventListener('input',()=>{const t=tracks[current];
-  if(hasSrc()&&isFinite(audio.duration)){audio.currentTime=seek.value/100*audio.duration;pos=audio.currentTime;}
+let scrubbing=false;
+seek.addEventListener('input',()=>{scrubbing=true;const t=tracks[current];
+  const len=(hasSrc()&&isFinite(audio.duration)&&audio.duration)?audio.duration:(t.len||180);
+  pos=seek.value/100*len;curEl.textContent=fmt(pos);});
+seek.addEventListener('change',()=>{const t=tracks[current];
+  if(hasSrc()&&isFinite(audio.duration)&&audio.duration){audio.currentTime=seek.value/100*audio.duration;pos=audio.currentTime;}
   else pos=seek.value/100*(t.len||180);
-  curEl.textContent=fmt(pos);});
+  curEl.textContent=fmt(pos);scrubbing=false;});
 buildList();buildWave();load(0,false);animWave();
 
 /* ---------- LOCAL TRACK UPLOADER (owner preview, session only) ---------- */
