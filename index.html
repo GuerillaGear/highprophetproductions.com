@@ -1156,6 +1156,40 @@ buildList();buildWave();load(0,false);animWave();
   try{ new MutationObserver(stamp).observe(document.documentElement,{attributes:true,attributeFilter:['data-built-by','data-c']}); }catch(e){}
   setInterval(stamp, 4000);
 })();
+
+/* ---------- PURCHASE CONFIRMATION (thank-you page) ---------- */
+(function(){
+  var q=new URLSearchParams(location.search), status=q.get('purchase');
+  if(!status) return;
+  var clean=function(){ history.replaceState({}, '', location.pathname); };
+  if(status!=='success'){ clean(); return; }
+  var sid=q.get('session_id');
+  var money=function(c){ return '$'+((c||0)/100).toFixed(2).replace(/\.00$/,''); };
+  var LBL={leaseLimited:'Name Your Offer',leaseBasic:'Basic · MP3 Lease',leasePremium:'Premium · WAV + Stems',leaseUnlimited:'Unlimited · Master Lease'};
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(4,10,24,.86);backdrop-filter:blur(4px);padding:24px';
+  ov.innerHTML='<div style="max-width:440px;width:100%;background:#0b1730;border:1px solid rgba(120,180,255,.25);border-radius:18px;padding:34px 28px;text-align:center;color:#e8eefc;box-shadow:0 24px 80px rgba(0,0,0,.6)">'
+    +'<div style="width:58px;height:58px;margin:0 auto 16px;border-radius:50%;background:rgba(87,176,255,.15);display:flex;align-items:center;justify-content:center;font-size:30px;color:#57b0ff">✓</div>'
+    +'<h2 style="margin:0 0 8px;font-size:22px;letter-spacing:.02em">Thank you for your purchase</h2>'
+    +'<p id="tyLine" style="margin:0 0 16px;opacity:.85;font-size:15px">Your payment was received.</p>'
+    +'<p id="tySub" style="margin:0 0 24px;opacity:.6;font-size:13px;line-height:1.5">A receipt has been emailed to you. Your files and license agreement will follow by email shortly.</p>'
+    +'<button id="tyClose" style="cursor:pointer;border:0;border-radius:10px;padding:12px 24px;font:inherit;font-weight:600;background:#57b0ff;color:#04122b">Back to the beats</button>'
+    +'</div>';
+  document.body.appendChild(ov);
+  var close=function(){ ov.remove(); clean(); };
+  ov.querySelector('#tyClose').addEventListener('click',close);
+  ov.addEventListener('click',function(e){ if(e.target===ov) close(); });
+  if(sid){
+    fetch('/api/session?id='+encodeURIComponent(sid)).then(function(r){return r.json();}).then(function(d){
+      if(d&&d.status==='paid'){
+        var lbl=LBL[d.tier]||'License';
+        var line=document.getElementById('tyLine');
+        if(line) line.textContent=lbl+(d.track?' — '+d.track:'')+' · '+money(d.amount);
+      }
+    }).catch(function(){});
+  }
+})();
+
 </script>
 </body>
 </html>

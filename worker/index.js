@@ -27,6 +27,9 @@ export default {
     if (url.pathname === "/api/checkout" && request.method === "POST") {
       return handleCheckout(request, env);
     }
+    if (url.pathname === "/api/session" && request.method === "GET") {
+      return handleSession(url, env);
+    }
     if (url.pathname === "/api/webhook" && request.method === "POST") {
       // Fulfillment is implemented in the next slice. Acknowledge for now so
       // Stripe doesn't retry while we build it out.
@@ -101,6 +104,40 @@ async function handleCheckout(request, env) {
   } catch (e) {
     console.log(`checkout — unexpected error. message=${e && e.message}`);
     return json({ error: "Unexpected error starting checkout." }, 500);
+  }
+}
+
+// Looks up a completed Checkout Session so the thank-you page can confirm the
+// purchase. Returns only safe, display-only fields.
+async function handleSession(url, env) {
+  try {
+    const id = url.searchParams.get("id") || "";
+    if (!/^cs_[A-Za-z0-9_]+$/.test(id)) {
+      return json({ error: "invalid session id" }, 400);
+    }
+    if (!env.STRIPE_SECRET_KEY) {
+      console.log("session — STRIPE_SECRET_KEY is not configured on the Worker.");
+      return json({ error: "not configured" }, 500);
+    }
+    const resp = await fetch(
+      `https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(id)}`,
+      { headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` } }
+    );
+    const s = await resp.json();
+    if (!resp.ok) {
+      console.log(`session — lookup failed. status=${resp.status} id=${id} err=${JSON.stringify(s.error || s)}`);
+      return json({ error: "lookup failed" }, 502);
+    }
+    return json({
+      status: s.payment_status, // "paid" when complete
+      tier: (s.metadata && s.metadata.tier) || "",
+      track: (s.metadata && s.metadata.track) || "",
+      amount: s.amount_total, // cents
+      email: (s.customer_details && s.customer_details.email) || "",
+    });
+  } catch (e) {
+    console.log(`session — unexpected error. message=${e && e.message}`);
+    return json({ error: "error" }, 500);
   }
 }
 
