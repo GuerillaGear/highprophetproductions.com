@@ -481,8 +481,8 @@ footer b{color:var(--candy)}
         </div>
         <div class="hero-feat">
           <span class="feat-label">Featured beat</span>
-          <div class="feat-title">Anointed</div>
-          <div class="feat-meta">92 BPM · Fm · Dark / Regal</div>
+          <div class="feat-title">All The Time</div>
+          <div class="feat-meta">High Prophet Productions</div>
           <div class="eq" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
           <button class="feat-play" id="heroPlay">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Preview
@@ -522,7 +522,7 @@ footer b{color:var(--candy)}
 
       <div class="playerbar playing-now" id="playerbar">
         <div class="pb-now">
-          <div class="pb-title" id="pbTitle">Anointed</div>
+          <div class="pb-title" id="pbTitle">All The Time</div>
           <div class="pb-sub" id="pbSub">92 BPM · Fm</div>
         </div>
         <div class="pb-mid">
@@ -994,12 +994,13 @@ document.getElementById('sendBtn').addEventListener('click',()=>{
 /* Put a hosted MP3/WAV URL in `src` for real playback to every visitor.
    Empty src = animated silent demo bar. Owner can also load local files: add #owner to the URL. */
 const tracks=[
-  {title:'Anointed',     bpm:92,  key:'Fm',  tags:'Dark · Regal',     len:178, src:''},
-  {title:'Throne Room',  bpm:84,  key:'Cm',  tags:'Cinematic · Soul', len:201, src:''},
-  {title:'High Prophet', bpm:140, key:'Gm',  tags:'Trap · Anthem',    len:165, src:''},
-  {title:'Gold Chains',  bpm:76,  key:'Am',  tags:'R&B · Slow',       len:189, src:''},
-  {title:'Crown Heavy',  bpm:130, key:'D#m', tags:'Dark · Drill',     len:172, src:''},
-  {title:'Sermon',       bpm:88,  key:'Em',  tags:'Soul · Anthem',    len:196, src:''},
+  {title:'All The Time',        bpm:'', key:'', tags:'', len:0, src:'audio/all-the-time.mp3'},
+  {title:'Flicker of a Flame',  bpm:'', key:'', tags:'', len:0, src:'audio/flicker-of-a-flame.mp3'},
+  {title:'ICY',                 bpm:'', key:'', tags:'', len:0, src:'audio/icy.mp3'},
+  {title:'IFEEST',              bpm:'', key:'', tags:'', len:0, src:'audio/ifeest.wav'},
+  {title:'Mirrored Perception', bpm:'', key:'', tags:'', len:0, src:'audio/mirrored-perception.mp3'},
+  {title:'Passion',             bpm:'', key:'', tags:'', len:0, src:'audio/passion.mp3'},
+  {title:"Who's In The Attic",  bpm:'', key:'', tags:'', len:0, src:'audio/whos-in-the-attic.mp3'},
 ];
 const audio=new Audio(); audio.preload='metadata';
 const listEl=document.getElementById('tracklist'),wave=document.getElementById('wave');
